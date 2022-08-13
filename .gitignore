@@ -8,5 +8,9 @@ build
 __pycache__
 *.creator.user
 *.egg-info
+*.so
 dist
 .cache
+.eggs
+.idea
+test.ply

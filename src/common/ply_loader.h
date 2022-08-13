@@ -84,9 +84,16 @@ pybind11::array ply_data_to_array(std::shared_ptr<tinyply::PlyData> attrib) {
     if (attrib->buffer.size_bytes() != num_rows * num_cols * bytes_per_scalar) {
         throw std::runtime_error("PLY loading internal error");
     }
-    pybind11::array attrib_array(attrib_dtype, std::vector<size_t>({num_rows, num_cols}));
-    std::memcpy(attrib_array.mutable_data(), attrib->buffer.get(), attrib->buffer.size_bytes());
-    return attrib_array;
+    if (num_cols == 1) {
+        pybind11::array attrib_array(attrib_dtype, std::vector<size_t>({num_rows}));
+        std::memcpy(attrib_array.mutable_data(), attrib->buffer.get(), attrib->buffer.size_bytes());
+        return attrib_array;
+    } else {
+        pybind11::array attrib_array(attrib_dtype, std::vector<size_t>({num_rows, num_cols}));
+        std::memcpy(attrib_array.mutable_data(), attrib->buffer.get(), attrib->buffer.size_bytes());
+        return attrib_array;
+    }
+
 }
 
 std::shared_ptr<tinyply::PlyData> request_properties_from_element(
@@ -463,7 +470,8 @@ void save_mesh_ply(std::string filename,
         pybind11::str key = (pybind11::str) kv->first;
         pybind11::array value = pybind11::array::ensure(kv->second);
         if (value.shape(0) != num_vertices) {
-            throw pybind11::value_error("Invalid vertex attribute " + std::string(key) + ". Must have same number of rows as vertices.");
+            throw pybind11::value_error("Invalid vertex attribute " + std::string(key) + 
+                                        ". Must have same number of rows as vertices.");
         }
         size_t num_cols = 1;
         for (int i = 1; i < value.ndim(); i += 1) {
@@ -473,11 +481,19 @@ void save_mesh_ply(std::string filename,
             throw pybind11::value_error("Invalid vertex attribute " + std::string(key) + " has zero elements.");
         }
         try {
-            tinyply::Type ply_dtype = dtype_to_ply_type(value.dtype());
-            plyf.add_properties_to_element(
+            if (num_cols == 1) {
+                tinyply::Type ply_dtype = dtype_to_ply_type(value.dtype());
+                plyf.add_properties_to_element(
+                    "vertex", { key }, ply_dtype, num_vertices,
+                    reinterpret_cast<std::uint8_t*>(value.mutable_data()), tinyply::Type::INVALID, 0);
+            } else {
+                tinyply::Type ply_dtype = dtype_to_ply_type(value.dtype());
+                plyf.add_properties_to_element(
                     "vertex", { key }, ply_dtype, num_vertices,
                     reinterpret_cast<std::uint8_t*>(value.mutable_data()), tinyply::Type::UINT8, num_cols);
-        } catch (const std::runtime_error& e) {
+            }
+        }
+        catch (const std::runtime_error& e) {
             throw pybind11::value_error("Invalid dtype for custom vertex attribute "+ std::string(key) + ".");
         }
     }
