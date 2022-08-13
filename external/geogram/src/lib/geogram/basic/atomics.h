@@ -53,7 +53,6 @@
  * \file geogram/basic/atomics.h
  * \brief Functions for atomic operations
  */
-
 #ifdef GEO_OS_LINUX
 #  if defined(GEO_OS_EMSCRIPTEN) 
 #    define GEO_USE_DUMMY_ATOMICS
@@ -62,7 +61,7 @@
 #  elif defined(GEO_OS_ANDROID)
 #    define GEO_USE_ANDROID_ATOMICS
 #  else
-#    define GEO_USE_X86_ATOMICS
+#    define GEO_USE_DUMMY_ATOMICS
 #  endif
 #endif
 
@@ -248,7 +247,7 @@ inline void send_event_arm32() {
  */
 inline void geo_pause() {
     __asm__ __volatile__ (
-        "pause;\n"
+        "yield;\n"
     );
 }
 

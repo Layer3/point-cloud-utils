@@ -10,7 +10,7 @@ option(EIGEN_WITH_MKL      "Whether to build Eigen with intel MKL or not"      O
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 
-set(FLAGS_SSE2 " ")
+set(FLAGS_SSE2 "-flax-vector-conversions")
 
 
 # Download NumpyEigen if we haven't already
@@ -89,7 +89,7 @@ set(EMBREE_DIR "${EXTERNAL_DEP_DIR}/embree")
 if(NOT TARGET embree)
   download_dep(embree
     GIT_REPOSITORY https://github.com/embree/embree.git
-    GIT_TAG        v3.12.1
+    GIT_TAG        v3.13.4
   )
 
   # Note: On macOS, building embree as a static lib can only be done with a single ISA target.
@@ -178,7 +178,7 @@ target_link_libraries(_pcu_internal PRIVATE embree)
 target_link_libraries(_pcu_internal PRIVATE geogram)
 target_link_libraries(_pcu_internal PRIVATE manifold)
 # target_link_libraries(_pcu_internal PRIVATE mls_utils)
-set_target_properties(_pcu_internal PROPERTIES COMPILE_FLAGS "-fvisibility=hidden -msse3")
+set_target_properties(_pcu_internal PROPERTIES COMPILE_FLAGS "-fvisibility=hidden")
 
 if(MSVC)
   target_compile_options(_pcu_internal PRIVATE
