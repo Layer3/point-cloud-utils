@@ -9,6 +9,10 @@ option(EIGEN_WITH_MKL      "Whether to build Eigen with intel MKL or not"      O
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+
+set(FLAGS_SSE2 " ")
+
+
 # Download NumpyEigen if we haven't already
 set(EXTERNAL_DEP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
 include(DownloadExternalDeps)
@@ -24,6 +28,11 @@ download_dep(tinyply
         GIT_REPOSITORY https://github.com/fwilliams/tinyply.git
         GIT_TAG point_cloud_utils
 )
+
+download_dep(simde
+        GIT_REPOSITORY https://github.com/simd-everywhere/simde.git
+)
+
 
 # Build manifold as a static lib
 download_dep(manifold
