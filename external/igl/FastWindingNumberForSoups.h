@@ -372,6 +372,7 @@ static inline fpreal64 SYSabs(fpreal64 a) { return ::fabs(a); }
 #define VM_SSE_STYLE		1
 
 //#include <emmintrin.h>
+#define SIMDE_ENABLE_NATIVE_ALIASES
 #include "../simde/simde/x86/sse2.h"
 
 #if defined(__SSE4_1__)
